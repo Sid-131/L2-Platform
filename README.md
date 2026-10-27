@@ -10,6 +10,15 @@ nobody could tell who wrote which verdict, and the manager's 1:1 prep was a pivo
 This platform takes the raw weekly export and turns it into routed review queues, a
 fast keyboard-driven review desk, and a printable report per case owner.
 
+![Review desk: an L2 reviewer's queue, why the case is on the list, and keyboard verdicts](docs/screenshots/review-desk.png)
+
+| Triage | This week | TSE report |
+|---|---|---|
+| [![Triage: cases the router could not place](docs/screenshots/triage.png)](docs/screenshots/triage.png) | [![Weekly dashboard with reviewer load and router accuracy](docs/screenshots/dashboard.png)](docs/screenshots/dashboard.png) | [![TSE report: one case owner's verdicts week by week](docs/screenshots/tse-report.png)](docs/screenshots/tse-report.png) |
+| Cases the router couldn't place, sorted by hand | Reviewer load, review state and router accuracy | One case owner's verdicts and trend, ready for a 1:1 |
+
+*Screens from the demo build, which runs on fictional data.*
+
 ## What it does
 
 | | |

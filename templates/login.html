@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% block body %}
+{% if demo %}
+<div class="demo-intro">
+ <p class="eyebrow">Live demo · made-up data</p>
+ <h1>L2 Review Platform</h1>
+ <p class="lede">Every week a support team exports its open cases. This platform turns that spreadsheet
+ into routed review queues for senior (L2) engineers, carries last week's verdicts forward so
+ nobody re-reviews what didn't change, and rolls the verdicts up into a one-page report per
+ case owner for their 1:1.</p>
+ <p class="sub">Pick a role to look around. Nothing you do here is kept, and the data is fictional.</p>
+ <div class="personas">
+ {% for k, p in personas.items() %}
+  <a class="persona card" href="/demo/as/{{ k }}">
+   <span class="avatar">{{ (p[1].split()|map('first')|join|upper)[:2] }}</span>
+   <span><b>{{ p[2] }}</b><span class="dim"> · {{ p[1] }}</span><br><span class="dim">{{ p[3] }}</span></span>
+  </a>
+ {% endfor %}
+ </div>
+ <ul class="facts">
+  <li><b>Carry-over:</b> a case is reviewed again only if its severity, status or age band changed, or after 4 weeks.</li>
+  <li><b>Assignment:</b> goes back to the same reviewer when possible, otherwise to the least-loaded, with a weekly cap per person.</li>
+  <li><b>Routing:</b> a keyword router suggests the queue. Corrections are kept as labelled training data.</li>
+  <li><b>Audit trail:</b> reviews and assignments are append-only, so every verdict can be traced to the person who wrote it.</li>
+ </ul>
+</div>
+{% else %}
+<div class="auth"><h1>L2 Review Platform</h1>
+<form method="post" class="card">
+ <label>Username</label><input name="username" autofocus>
+ <label>Password</label><input name="password" type="password">
+ <button class="btn" style="margin-top:12px">Sign in</button>
+</form></div>
+{% endif %}
+{% endblock %}

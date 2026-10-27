@@ -1,0 +1,37 @@
+{% extends "base.html" %}{% block body %}
+<h1>Users</h1><p class="sub">Reviews are attributed to the signed-in account, so every L2 needs their
+own. Tick every queue a person works — cases are shared out across all of them against a
+single weekly limit, not one limit per queue. Adding, removing or disabling someone, or
+changing their queues, shares this week's open cases out again — cases already started
+or placed by hand stay put.</p>
+<div class="card"><form method="post" class="filters"><input type="hidden" name="action" value="add">
+ <div><label>Name</label><input name="display_name" placeholder="Must match the roster"></div>
+ <div><label>Username</label><input name="username"></div>
+ <div><label>Password</label><input name="password" value="changeme"></div>
+ <div><label>Role</label><select name="role"><option>l2</option><option>manager</option><option>admin</option></select></div>
+ <div><label>Queues</label><div class="qopts">
+ {% for q in queues %}<label class="qopt"><input type="checkbox" name="queues" value="{{q}}">{{q}}</label>
+ {% endfor %}</div></div>
+ <div><button class="btn">Add</button></div>
+</form></div>
+<div class="card scroll"><table><tr><th>Name</th><th>Username</th><th>Role</th><th>Queues</th>
+<th>Workload</th><th>Last sign-in</th><th></th></tr>
+{% for u in users %}<tr class="{{'' if u.active else 'off'}}">
+<td>{{u.name}}</td><td class="dim">{{u.username}}</td><td>{{u.role}}</td>
+<td><form method="post"><input type="hidden" name="action" value="queues">
+ <input type="hidden" name="user_id" value="{{u.id}}">
+ <div class="qopts">
+ {% for q in queues %}<label class="qopt">
+  <input type="checkbox" name="queues" value="{{q}}" {{'checked' if q in u.queues}}>{{q}}</label>
+ {% endfor %}</div>
+ <button class="btn xs">Save queues</button></form></td>
+<td class="xs dim">{{u.assigned}} assigned<br>{{u.open_cases}} awaiting review<br>{{u.reviews}} written</td>
+<td class="dim">{{ u.last_login.strftime('%Y-%m-%d') if u.last_login else 'never' }}</td>
+<td><form method="post" class="inline"><input type="hidden" name="user_id" value="{{u.id}}">
+ <button class="btn alt xs" name="action" value="toggle">{{ 'Disable' if u.active else 'Enable' }}</button>
+ <button class="btn alt xs" name="action" value="reset">Reset password</button>
+ <button class="btn danger xs" name="action" value="delete"
+  onclick='return confirm({{ ("Delete " ~ u.name ~ "?\n\n" ~ u.assigned ~ " case(s) assigned, " ~ u.open_cases ~ " still awaiting review, " ~ u.reviews ~ " review(s) written.\n\nReviews keep their name. Open work is handed to the rest of the queue.")|tojson }})'
+  >Delete</button></form></td>
+</tr>{% endfor %}</table></div>
+{% endblock %}

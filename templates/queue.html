@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% import "_palette.html" as pal %}
+{% block title %}Review · L2 Review Platform{% endblock %}
+{% block mainclass %}full{% endblock %}
+{% block body %}
+{% set wk = weeks|selectattr('id', 'equalto', week_id)|first %}
+<div class="desk">
+ <aside class="queue" aria-label="Cases">
+  <div class="qhead">
+   <div><h1>{{ wk.label if wk else 'This week' }}</h1><p id="qsub"></p></div>
+   <div class="ring" aria-hidden="true">
+    <svg width="60" height="60"><circle class="trk" cx="30" cy="30" r="24"/><circle class="val" id="ringVal" cx="30" cy="30" r="24"/></svg>
+    <b id="ringTxt"></b>
+   </div>
+   <form class="qfil" method="get">
+    <label class="sr" for="f-week">Week</label>
+    <select id="f-week" name="week_id" onchange="this.form.submit()">
+     {% for w in weeks %}<option value="{{ w.id }}" {{ 'selected' if w.id == week_id }}>{{ w.label }}</option>{% endfor %}</select>
+    <label class="sr" for="f-state">State</label>
+    <select id="f-state" name="state" onchange="this.form.submit()"><option value="">Any state</option>
+     {% for s in ['new', 'changed', 'periodic', 'carried'] %}<option {{ 'selected' if f.state == s }}>{{ s }}</option>{% endfor %}</select>
+    {% if me.can_see_all %}
+    <label class="sr" for="f-who">Reviewer</label>
+    <select id="f-who" name="assignee" onchange="this.form.submit()"><option value="">Every reviewer</option>
+     {% for p in people %}<option {{ 'selected' if f.assignee == p }}>{{ p }}</option>{% endfor %}</select>
+    <label class="sr" for="f-q">Queue</label>
+    <select id="f-q" name="queue" onchange="this.form.submit()"><option value="">Every queue</option>
+     {% for q in queues %}<option {{ 'selected' if f.queue == q }}>{{ q }}</option>{% endfor %}</select>
+    {% endif %}
+    <label class="sr" for="f-search">Search</label>
+    <input class="wide" id="f-search" name="search" value="{{ f.search or '' }}" placeholder="Search case, summary or customer  ( / )">
+   </form>
+   <div class="seg" role="group" aria-label="Show">
+    <button type="button" data-f="todo">To do</button>
+    <button type="button" data-f="done">Done</button>
+    <button type="button" data-f="carried">Carried</button>
+    <button type="button" data-f="all">All</button>
+   </div>
+  </div>
+  <div class="list" id="list"></div>
+ </aside>
+
+ <article class="dossier" aria-label="Selected case">
+  <div class="read" id="read" aria-live="polite"></div>
+  <div class="composer" id="composer">
+   <div class="comp">
+    <div>
+     <label id="bLbl">Verdict</label>
+     <div class="keys" id="keys" role="group" aria-labelledby="bLbl"></div>
+    </div>
+    <div class="side">
+     <label id="cLbl">Call made</label>
+     <div class="yn" role="group" aria-labelledby="cLbl">
+      <button type="button" data-call="Yes">Yes <kbd>Y</kbd></button>
+      <button type="button" data-call="No">No <kbd>N</kbd></button>
+     </div>
+     <label for="comment"><span>Comment</span><span id="req"></span></label>
+     <textarea id="comment" placeholder="What should have happened?"></textarea>
+     <p class="err" id="err" role="alert"></p>
+    </div>
+    <div class="actions">
+     <button class="btn save" id="save" type="button"><span id="saveTxt">Save verdict</span> <kbd>Enter</kbd></button>
+     <button class="btn alt" id="skip" type="button">Skip</button>
+     <div class="hints"><span><kbd>J</kbd><kbd>K</kbd> move</span><span><kbd>1</kbd>–<kbd>{{ [buckets|length, 9]|min }}</kbd> verdict</span><span><kbd>C</kbd> comment</span></div>
+    </div>
+   </div>
+  </div>
+  <div class="stamp" id="stamp" aria-hidden="true"></div>
+ </article>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script id="items" type="application/json">{{ items|tojson }}</script>
+<script>
+const ITEMS = JSON.parse(document.getElementById('items').textContent);
+const BUCKETS = {{ buckets|tojson }};
+const COLORS = { {% for b in buckets %}{{ b|tojson }}: "{{ pal.bcolor(b, buckets) }}"{{ ',' if not loop.last }}{% endfor %} };
+const QUEUES = {{ queues|tojson }};
+const CAN_MOVE = {{ 'true' if me.can_see_all else 'false' }};
+const ME = {{ me.display_name|tojson }};
+
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cat = i => i.needs ? 'todo' : (i.carried ? 'carried' : 'done');
+const sevColor = s => /crit/i.test(s) ? 'var(--bad)' : /high/i.test(s) ? 'var(--warn)' : 'var(--muted)';
+const bandColor = a => a >= 60 ? '#FF6B5E' : a >= 30 ? '#F08A4B' : a >= 14 ? '#E8B04A' : '#6CCB8B';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let filter = ITEMS.some(i => i.needs) ? 'todo' : 'all', cur = null, draft = {};
+
+function visible() { return ITEMS.filter(i => filter === 'all' || cat(i) === filter); }
+
+function ageMeter(a) {
+  const ticks = [7, 14, 30, 60].map(t => `<u style="left:${t / 90 * 100}%"></u>`).join('');
+  return `<span class="agem"><span class="agebar"><i style="width:${Math.min(a, 90) / 90 * 100}%;background:${bandColor(a)}"></i>${ticks}</span>${a}d</span>`;
+}
+function verdictChip(i) {
+  return `<span class="meta" style="color:var(--paper)"><span class="dot" style="background:${COLORS[i.bucket] || '#5A616C'}"></span>${esc(i.bucket)}</span>`;
+}
+function renderList() {
+  const v = visible();
+  $('#list').innerHTML = v.length ? v.map(i => `
+   <button type="button" class="strip" data-cw="${i.cw_id}" aria-current="${cur === i}">
+    <span class="sid">${esc(i.lightning)}</span>
+    ${i.bucket && !i.needs ? verdictChip(i) : `<span class="pill ${ {new:'new',changed:'chg',periodic:'per',carried:'car'}[i.state] || '' }">${esc(i.state)}</span>`}
+    <span class="meta"><span style="color:${sevColor(i.severity)};font-weight:600">${esc(i.severity)}</span>${ageMeter(i.age)}<span>${esc(i.skill)}</span>${CAN_MOVE && i.assigned ? `<span>${esc(i.assigned)}</span>` : ''}</span>
+    <span></span>
+    <span class="sum1">${i.summary ? esc(i.summary) : '<i>No usable summary in the export</i>'}</span>
+   </button>`).join('')
+   : `<p class="empty">${filter === 'todo' ? 'Nothing waiting. Every case here has a verdict.' : 'No cases in this view.'}</p>`;
+  $$('.strip').forEach(b => b.onclick = () => select(ITEMS.find(i => i.cw_id == b.dataset.cw)));
+}
+function renderProgress() {
+  const work = ITEMS.filter(i => i.state !== 'carried'), done = work.filter(i => !i.needs).length, n = work.length;
+  const C = 2 * Math.PI * 24;
+  $('#ringVal').style.strokeDasharray = C;
+  $('#ringVal').style.strokeDashoffset = n ? C * (1 - done / n) : 0;
+  $('#ringTxt').textContent = `${done}/${n}`;
+  $('#qsub').textContent = n - done ? `${n - done} waiting for a verdict` : (n ? 'All verdicts in' : 'Nothing to review');
+  $$('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === filter));
+}
+function renderRead() {
+  const i = cur;
+  if (!i) { $('#read').innerHTML = '<div><p class="empty">No cases match these filters.</p></div>'; $('#composer').hidden = true; return; }
+  $('#composer').hidden = false;
+  const why = i.state === 'carried' ? ['Nothing material changed since the last verdict.']
+            : (i.reason || '').split(/;\s*/).filter(Boolean);
+  const router = i.suggested && i.suggested !== i.skill
+    ? `Router suggested ${esc(i.suggested)}${i.evidence ? ' (matched: ' + esc(i.evidence) + ')' : ''}`
+    : (i.evidence ? 'Router matched: ' + esc(i.evidence) : '');
+  const queue = CAN_MOVE
+    ? `<label class="sr" for="mv">Queue</label><select id="mv">${QUEUES.map(q => `<option ${q === i.skill ? 'selected' : ''}>${esc(q)}</option>`).join('')}</select>`
+    : esc(i.skill);
+  let prev = '';
+  if (i.bucket && !i.needs) {
+    prev = `<div class="sec">${i.carried ? 'Carried from last week' : 'Current verdict'}</div>
+     <div class="prev"><span class="dot" style="background:${COLORS[i.bucket] || '#5A616C'};margin-top:8px"></span>
+      <div><b>${esc(i.bucket)}</b>${i.call ? ' · call made: ' + esc(i.call) : ''} <span class="dim">· ${esc(i.prev_author)}</span>
+      ${i.comment ? `<div><q>${esc(i.comment)}</q></div>` : ''}</div></div>`;
+  }
+  $('#read').innerHTML = `<div>
+    <div class="crumb"><span>${esc(i.skill)} queue</span><span>·</span><span class="pill ${ {new:'new',changed:'chg',periodic:'per',carried:'car'}[i.state] || '' }">${esc(i.state)}</span></div>
+    <div class="case-h"><h2>${esc(i.lightning)}</h2><span>${i.sf_url ? `<a href="${esc(i.sf_url)}" target="_blank" rel="noopener">Salesforce</a> · ` : ''}<a href="/case/${i.case_id}">Full history</a></span></div>
+    <dl class="facts">
+     <div><dt>Severity</dt><dd style="color:${sevColor(i.severity)}">${esc(i.severity) || '—'}</dd></div>
+     <div><dt>Age</dt><dd>${i.age} days</dd></div>
+     <div><dt>Status</dt><dd>${esc(i.status) || '—'}</dd></div>
+     <div><dt>Case owner</dt><dd>${esc(i.tse) || '—'}</dd></div>
+     <div><dt>Customer</dt><dd>${esc(i.customer) || '—'}</dd></div>
+     <div><dt>Queue</dt><dd>${queue}</dd></div>
+     ${CAN_MOVE ? `<div><dt>Reviewer</dt><dd>${esc(i.assigned) || 'unassigned'}</dd></div>` : ''}
+    </dl>
+    <section class="why"><h3><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1.5l6 11H1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Why it is on the list</h3>
+     ${why.map(w => `<div>${esc(w)}</div>`).join('')}${router ? `<div class="dim">${router}</div>` : ''}</section>
+    <div class="sec">The case</div>
+    ${i.summary ? `<p class="story">${esc(i.summary)}</p>` : '<p class="story none">The export had no usable summary for this case. Open it in the case system before you give a verdict.</p>'}
+    ${prev}
+   </div>`;
+  const mv = $('#mv');
+  if (mv) mv.onchange = () => post('/api/skill', {case_id: i.case_id, cw_id: i.cw_id, skill: mv.value}).then(r => {
+    if (!r.ok) { mv.value = i.skill; alert(r.error || 'Not saved'); return; }
+    const handed = r.assigned !== undefined && r.assigned !== i.assigned;
+    i.skill = mv.value;
+    if (r.assigned !== undefined) i.assigned = r.assigned;
+    toast(`${i.lightning} moved to ${mv.value}${handed ? ' · reviewer now ' + r.assigned : ''}`);
+    if (r.warning) alert(r.warning);
+    renderList(); renderRead();
+  });
+}
+function renderComposer() {
+  if (!cur) return;
+  $('#keys').innerHTML = BUCKETS.map((b, n) => `<button type="button" class="key" style="--c:${COLORS[b]}" data-b="${esc(b)}" aria-pressed="${draft.bucket === b}"><span class="sw" style="background:${COLORS[b]}"></span>${esc(b)}${n < 9 ? `<kbd>${n + 1}</kbd>` : ''}</button>`).join('');
+  $$('.key').forEach(k => k.onclick = () => { draft.bucket = k.dataset.b; renderComposer(); });
+  $$('.yn button').forEach(b => b.setAttribute('aria-pressed', draft.call === b.dataset.call));
+  if (document.activeElement !== $('#comment')) $('#comment').value = draft.comment || '';
+  $('#req').textContent = draft.bucket && draft.bucket !== 'NAC' ? 'Required' : 'Optional for NAC';
+  $('#saveTxt').textContent = cur.needs ? 'Save verdict' : 'Update verdict';
+}
+function select(i) {
+  cur = i || null;
+  draft = cur ? {bucket: cur.bucket || null, call: cur.call || null, comment: cur.comment || ''} : {};
+  $('#err').textContent = ''; $('#comment').classList.remove('badf');
+  renderList(); renderRead(); renderComposer();
+  const el = cur && $(`.strip[data-cw="${cur.cw_id}"]`); if (el) el.scrollIntoView({block: 'nearest'});
+}
+function move(d) {
+  const v = visible(); if (!v.length) return;
+  const n = v.indexOf(cur);
+  select(v[n < 0 ? 0 : Math.max(0, Math.min(v.length - 1, n + d))]);
+}
+function post(url, body) {
+  return fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)})
+    .then(r => r.json()).catch(() => ({ok: false, error: 'Could not reach the server'}));
+}
+function save() {
+  if (!cur) return;
+  const b = draft.bucket, cm = $('#comment').value.trim();
+  if (!b) { $('#err').textContent = 'Pick a verdict first.'; return; }
+  if (b !== 'NAC' && !cm) { $('#err').textContent = 'Anything other than NAC needs a comment.'; $('#comment').classList.add('badf'); $('#comment').focus(); return; }
+  const i = cur;
+  post('/api/review', {cw_id: i.cw_id, bucket: b, call_made: draft.call || '', comment: cm}).then(r => {
+    if (!r.ok) { $('#err').textContent = r.error || 'Not saved'; return; }
+    const at = visible().indexOf(i);
+    Object.assign(i, {bucket: b, call: draft.call || '', comment: cm, needs: false, carried: false, prev_author: ME});
+    const st = $('#stamp'); st.textContent = b; st.style.setProperty('--c', COLORS[b]);
+    st.classList.remove('go'); void st.offsetWidth; st.classList.add('go');
+    toast(`${i.lightning} saved as ${b}`);
+    renderProgress();
+    // in To do the saved case drops out, so the one that was after it takes its slot
+    const v = visible(), next = filter === 'todo' ? v[Math.max(0, Math.min(at, v.length - 1))] : i;
+    setTimeout(() => select(next), reduced ? 0 : 620);
+  });
+}
+let tt;
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => el.classList.remove('show'), 3500); }
+
+$('#save').onclick = save;
+$('#skip').onclick = () => move(1);
+$$('.yn button').forEach(b => b.onclick = () => { draft.call = b.dataset.call; renderComposer(); });
+$('#comment').addEventListener('input', e => { draft.comment = e.target.value; $('#err').textContent = ''; e.target.classList.remove('badf'); });
+$$('.seg button').forEach(b => b.onclick = () => {
+  filter = b.dataset.f; renderProgress();
+  const v = visible(); select(v.includes(cur) ? cur : v[0]);
+});
+document.addEventListener('keydown', e => {
+  const t = e.target;
+  if (t.matches('textarea, input, select')) {
+    if (t.id === 'comment' && e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); save(); }
+    if (e.key === 'Escape') t.blur();
+    return;
+  }
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === 'j' || k === 'arrowdown') { e.preventDefault(); move(1); }
+  else if (k === 'k' || k === 'arrowup') { e.preventDefault(); move(-1); }
+  else if (/^[1-9]$/.test(k) && BUCKETS[+k - 1] && cur) { draft.bucket = BUCKETS[+k - 1]; renderComposer(); }
+  else if (k === 'y' || k === 'n') { draft.call = k === 'y' ? 'Yes' : 'No'; renderComposer(); }
+  else if (k === 'c') { e.preventDefault(); $('#comment').focus(); }
+  else if (k === '/') { e.preventDefault(); $('#f-search').focus(); }
+  else if (k === 'enter' && !t.matches('.strip, a, .seg button, #skip')) { e.preventDefault(); save(); }
+});
+
+renderProgress();
+select(visible()[0]);
+</script>
+{% endblock %}

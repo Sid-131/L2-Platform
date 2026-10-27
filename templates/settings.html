@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% block body %}
+<h1>Settings</h1><p class="sub">Applied on the next upload. Cases already loaded keep their queue.</p>
+<form method="post">
+<div class="card"><div class="row">
+ <div><label>Weekly cap per reviewer</label><input name="weekly_cap_per_reviewer" value="{{c.weekly_cap_per_reviewer}}"></div>
+ <div><label>Re-review after N weeks</label><input name="recheck_after_weeks" value="{{c.recheck_after_weeks}}"></div>
+ <div><label>Age bands (days)</label><input name="age_bands" value="{{ c.age_bands|join(', ') }}"></div>
+</div>
+<p class="dim xs">A case comes back for review when its severity or status changes, when it crosses one of those age bands, or after the re-review interval.</p></div>
+<div class="card"><label>Bucket values</label><input name="buckets" value="{{ c.buckets|join(', ') }}">
+<p class="dim xs">NAC must stay first — it is the one bucket that does not require a comment.</p></div>
+{% for q in c.queues %}<div class="card"><h2 style="margin-top:0">{{q}}</h2>
+<div class="dim xs">Keywords, comma separated. Trailing * is a prefix match.</div>
+<textarea name="kw_{{q}}" style="min-height:110px">{{ c.keywords[q]|join(', ') }}</textarea></div>{% endfor %}
+<button class="btn">Save</button></form>
+{% endblock %}

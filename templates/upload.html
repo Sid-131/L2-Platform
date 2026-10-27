@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% block body %}
+<h1>Upload the weekly export</h1>
+<p class="sub">One export per week. Cases already known are matched on their case number and keep the review they already have — only what materially changed comes back for a fresh look.</p>
+{% if demo %}<div class="flash">Demo: <a href="/demo/sample.csv">download next week's sample export</a>, then drop it below with the date it suggests (or any later Sunday). Watch the carry-over counts in the result.</div>{% endif %}
+<div class="card"><form method="post" enctype="multipart/form-data" id="f">
+ <div class="row">
+  <div><label>Week ending</label><input type="date" name="week_ending" value="{{default_week}}"></div>
+ </div>
+ <div class="drop" id="drop" style="margin-top:12px">
+  <b>Drop the export here</b><div class="dim">or click to browse · .xlsx .xls .csv</div>
+  <div id="picked"></div><input type="file" name="file" id="file" accept=".xlsx,.xls,.csv" hidden></div>
+ <button class="btn" id="go" style="margin-top:14px" disabled>Upload and route</button>
+</form></div>
+<h2>Weeks loaded</h2>
+<div class="card scroll"><table><tr><th>Week</th><th>Ending</th><th>Rows</th><th>New cases</th>
+<th>Carried</th><th>File</th><th>By</th></tr>
+{% for w in weeks %}<tr><td><b>{{w.label}}</b></td><td>{{w.week_ending}}</td><td>{{w.rows}}</td>
+<td class="ok">{{w.new}}</td><td class="dim">{{w.carried}}</td><td class="dim">{{w.file}}</td>
+<td class="dim">{{w.by}}</td></tr>{% endfor %}</table></div>
+<script>
+const d=document.getElementById('drop'),fi=document.getElementById('file'),go=document.getElementById('go');
+d.onclick=()=>fi.click();
+['dragover','dragenter'].forEach(e=>d.addEventListener(e,v=>{v.preventDefault();d.classList.add('hot')}));
+['dragleave','drop'].forEach(e=>d.addEventListener(e,v=>{v.preventDefault();d.classList.remove('hot')}));
+d.addEventListener('drop',v=>{fi.files=v.dataTransfer.files;pick()});
+fi.onchange=pick;
+function pick(){if(!fi.files.length)return;const p=document.getElementById('picked');p.innerHTML='<span class="pill"></span>';p.firstChild.textContent=fi.files[0].name;go.disabled=false}
+document.getElementById('f').onsubmit=()=>{go.disabled=true;go.textContent='Working…'};
+</script>
+{% endblock %}

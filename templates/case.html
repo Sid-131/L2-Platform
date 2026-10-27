@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "_palette.html" as pal %}
+{% block title %}{{ c.lightning }} · L2 Review Platform{% endblock %}
+{% block body %}
+<div class="crumb dim" style="display:flex;gap:10px;font-size:13px"><a href="/">Review</a><span>/</span><span>Case history</span></div>
+<h1 style="font-size:40px;line-height:46px;margin:6px 0 18px">{{ c.lightning }}
+{% if c.sf_url %}<a href="{{ c.sf_url }}" target="_blank" rel="noopener" style="font-size:15px;font-weight:400;margin-left:12px">Open in Salesforce</a>{% endif %}</h1>
+<dl class="facts">
+ <div><dt>Case owner</dt><dd>{{ c.tse or '—' }}</dd></div>
+ <div><dt>Customer</dt><dd>{{ c.customer or '—' }}</dd></div>
+ <div><dt>Queue</dt><dd>{{ c.skill }} <span class="dim xs">set by {{ c.source }}</span></dd></div>
+ <div><dt>Router suggested</dt><dd>{{ c.suggested or '—' }}{% if c.evidence %} <span class="dim xs">{{ c.evidence }}</span>{% endif %}</dd></div>
+</dl>
+{% if c.summary %}<p class="story" style="margin:0 0 32px">{{ c.summary }}</p>
+{% else %}<p class="story none" style="margin:0 0 32px">The export had no usable summary for this case.</p>{% endif %}
+
+<div class="sec">Week by week, newest first</div>
+<ol class="tl">
+{% for h in history %}
+ {% set latest = h.reviews[0] if h.reviews else none %}
+ <li>
+  <span class="pin">{% if latest and latest.bucket %}<i style="background:{{ pal.bcolor(latest.bucket, buckets) }}{{ ';opacity:.45' if latest.kind == 'carried' }}"></i>{% endif %}</span>
+  <div class="wk"><b>{{ h.week }}</b>
+   <span class="pill {{ {'new': 'new', 'changed': 'chg', 'periodic': 'per', 'carried': 'car'}[h.state] }}">{{ h.state }}</span>
+   <span class="dim">{{ h.age }} days · {{ h.status }} · {{ h.severity }}{% if h.who %} · {{ h.who }}{% endif %}</span></div>
+  {% if h.reason %}<div class="dim xs" style="margin-top:2px">{{ h.reason }}</div>{% endif %}
+  {% for r in h.reviews %}
+  <div class="rev" {% if not loop.first %}style="opacity:.7"{% endif %}>
+   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <span class="dot" style="background:{{ pal.bcolor(r.bucket, buckets) }}"></span><b>{{ r.bucket or 'No bucket' }}</b>
+    <span class="dim xs">{{ r.author }} · {{ 'carried forward' if r.kind == 'carried' else r.kind }} · {{ r.at.strftime('%Y-%m-%d %H:%M') }}</span></div>
+   {% if r.comment %}<q style="display:block;margin-top:6px;font-family:var(--story);font-size:17px;line-height:25px;quotes:none">{{ r.comment }}</q>{% endif %}
+  </div>
+  {% else %}<div class="dim" style="margin-top:6px">No verdict recorded.</div>{% endfor %}
+ </li>
+{% endfor %}
+</ol>
+{% endblock %}

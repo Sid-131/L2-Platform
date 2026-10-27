@@ -1,0 +1,33 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}L2 Review Platform{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}"></head><body>
+{% if me %}
+<header class="top">
+ <a class="mark" href="/">
+  <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="3" width="14" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6 8h6M6 11.5h6M6 15h3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="17" cy="16" r="4" fill="#FF6B5E"/></svg>
+  L2 Review</a>
+ <nav class="tabs" aria-label="Main">
+  <a href="/" {{ 'aria-current=page' if request.path == '/' }}>Review</a>
+  {% if me.can_see_all %}
+  <a href="/dashboard" {{ 'aria-current=page' if request.path.startswith('/dashboard') }}>This week</a>
+  <a href="/tse" {{ 'aria-current=page' if request.path.startswith('/tse') }}>TSE report</a>
+  <a href="/triage" {{ 'aria-current=page' if request.path.startswith('/triage') }}>Triage</a>
+  {% endif %}
+  {% if me.is_admin %}
+  <a href="/upload" {{ 'aria-current=page' if request.path.startswith('/upload') }}>Upload</a>
+  <a href="/settings" {{ 'aria-current=page' if request.path.startswith('/settings') }}>Settings</a>
+  <a href="/users" {{ 'aria-current=page' if request.path.startswith('/users') }}>Users</a>
+  {% endif %}
+ </nav>
+ <div class="who">{% if demo %}<span class="demo-tag" title="Made-up data. Changes are temporary.">Demo</span>
+  <span class="demo-switch">View as {% for k, p in personas.items() %}<a href="/demo/as/{{ k }}" {{ 'aria-current=true' if me.username == p[0] }}>{{ p[2] }}</a>{% endfor %}</span>
+  <form method="post" action="/demo/reset" class="demo-reset"><button type="submit">Reset</button></form>
+  {% else %}<a href="/password">Password</a>{% endif %}<a href="/logout">Sign out</a>
+  <span>{{ me.display_name }}</span><span class="avatar" aria-hidden="true">{{ (me.display_name.split()|map('first')|join|upper)[:2] }}</span></div>
+</header>
+{% endif %}
+<main class="{% block mainclass %}{% endblock %}">
+{% with msgs=get_flashed_messages() %}{% if msgs %}<div class="flash" role="status">{{ msgs|join(' ') }}</div>{% endif %}{% endwith %}
+{% block body %}{% endblock %}
+</main></body></html>

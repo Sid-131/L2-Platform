@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block body %}
+<h1>Nothing loaded yet</h1>
+<p class="sub">No weekly export has been uploaded.
+{% if me.is_admin %}<a href="/upload">Upload one</a>.{% else %}Ask your coordinator to upload this week's file.{% endif %}</p>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% import "_palette.html" as pal %}
+{% block title %}This week · L2 Review Platform{% endblock %}
+{% block body %}
+{% set wk = weeks|selectattr('id', 'equalto', week_id)|first %}
+{% set s_new, s_chg, s_per, s_car = states.get('new', 0), states.get('changed', 0), states.get('periodic', 0), states.get('carried', 0) %}
+{% set came_back = s_new + s_chg + s_per %}
+{% set pending = by_person|sum(attribute='Pending') %}
+{% set total = by_person|sum(attribute='Total') %}
+<div class="ph">
+ <div><h1>{{ wk.label if wk else 'No weeks loaded' }}</h1>
+  <p class="sub" style="margin:0">{{ total }} cases this week. {{ came_back }} came back for a verdict; the rest kept last week's.</p></div>
+ <form method="get" class="noprint" style="margin-left:auto"><label class="sr" for="wk">Week</label>
+  <select id="wk" name="week_id" onchange="this.form.submit()">
+  {% for w in weeks %}<option value="{{ w.id }}" {{ 'selected' if w.id == week_id }}>{{ w.label }}</option>{% endfor %}</select></form>
+</div>
+
+<dl class="kpis">
+ <div class="kpi"><dt>Came back for a verdict</dt><dd>{{ came_back }}</dd></div>
+ <div class="kpi"><dt>Carried forward untouched</dt><dd>{{ s_car }}</dd></div>
+ <div class="kpi"><dt>Verdicts written</dt><dd>{{ [total - pending - s_car, 0]|max }}</dd></div>
+ <div class="kpi"><dt>Still pending</dt><dd {% if pending %}style="color:var(--bad)"{% endif %}>{{ pending }}</dd></div>
+</dl>
+
+<div class="card">
+ <h2>Why cases are on the list</h2>
+ <p class="sub">Carried cases keep last week's verdict. Everything else needs a person.</p>
+ {% set all_states = [s_new, s_chg, s_per, s_car]|sum %}
+ {% if all_states %}
+ <div class="split" role="img" aria-label="{{ s_new }} new, {{ s_chg }} changed, {{ s_per }} periodic, {{ s_car }} carried">
+  <i style="width:{{ 100 * s_new / all_states }}%;background:#9DB8FF"></i><i style="width:{{ 100 * s_chg / all_states }}%;background:#E8C27A"></i><i style="width:{{ 100 * s_per / all_states }}%;background:#C7B2FF"></i><i class="hatch" style="width:{{ 100 * s_car / all_states }}%"></i>
+ </div>
+ {% endif %}
+ <div class="legend">
+  <span><i style="background:#9DB8FF"></i>New {{ s_new }}</span><span><i style="background:#E8C27A"></i>Changed {{ s_chg }}</span>
+  <span><i style="background:#C7B2FF"></i>Periodic re-check {{ s_per }}</span><span><i class="hatch"></i>Carried {{ s_car }}</span>
+ </div>
+</div>
+
+<div class="cols">
+ <div class="card">
+  <h2>Reviewers</h2>
+  <p class="sub">Cases each person holds this week: verdict in, and still pending.</p>
+  {% set top = (by_person|map(attribute='Total')|max) if by_person else 1 %}
+  {% for g in by_person %}
+  <div class="bar"><span>{{ g.name }}</span>
+   <span class="track" role="img" aria-label="{{ g.Total - g.Pending }} with a verdict, {{ g.Pending }} pending">
+    <i style="width:{{ 100 * (g.Total - g.Pending) / top }}%;background:var(--paper)"></i><i class="hatch" style="width:{{ 100 * g.Pending / top }}%"></i></span>
+   <span class="n">{% if g.Pending %}<b class="bad">{{ g.Pending }}</b> left{% else %}done{% endif %}</span></div>
+  {% else %}<p class="dim">No cases this week.</p>{% endfor %}
+  <div class="legend"><span><i style="background:var(--paper)"></i>Verdict in</span><span><i class="hatch"></i>Pending</span></div>
+ </div>
+ <div class="card">
+  <h2>Router accuracy</h2>
+  <p class="sub">How often the keyword router picked the queue a reviewer kept.</p>
+  <div style="display:flex;gap:36px;align-items:flex-end">
+   <div><div class="big" style="font-size:56px;line-height:56px">{{ train.agreement_pct if train.agreement_pct is not none else '—' }}{% if train.agreement_pct is not none %}%{% endif %}</div>
+    <div class="dim" style="margin-top:8px">agreement</div></div>
+   <dl style="margin:0;display:grid;grid-template-columns:auto auto;gap:6px 16px">
+    <dt class="dim">Cases held</dt><dd style="margin:0">{{ train.cases }}</dd>
+    <dt class="dim">Queue set by a person</dt><dd style="margin:0">{{ train.human_labelled }}</dd>
+    <dt class="dim">Corrections recorded</dt><dd style="margin:0">{{ train.corrections }}</dd>
+   </dl>
+  </div>
+  <p class="dim xs" style="margin:16px 0 0">Every correction is a labelled row. Around a thousand of them and a trained classifier will beat the keyword rules.</p>
+ </div>
+</div>
+
+<div class="card">
+ <h2>Verdicts, week over week</h2>
+ <p class="sub">The newest verdict on every case, carried ones included.</p>
+ {% set wtop = (weekly|map(attribute='Total')|max) if weekly else 1 %}
+ {% for w in weekly %}
+ <div class="bar" style="grid-template-columns:90px 1fr 60px"><b>{{ w.name }}</b>
+  <span class="track" role="img" aria-label="{% for b in buckets %}{{ w[b] }} {{ b }}, {% endfor %}{{ w.Pending }} pending">
+   {% for b in buckets %}{% if w[b] %}<i style="width:{{ 100 * w[b] / (wtop or 1) }}%;background:{{ pal.bcolor(b, buckets) }}" title="{{ b }}: {{ w[b] }}"></i>{% endif %}{% endfor %}
+   {% if w.Pending %}<i class="hatch" style="width:{{ 100 * w.Pending / (wtop or 1) }}%" title="Pending: {{ w.Pending }}"></i>{% endif %}
+  </span><span class="n">{{ w.Total }}</span></div>
+ {% endfor %}
+ <div class="legend">{% for b in buckets %}<span><i style="background:{{ pal.bcolor(b, buckets) }}"></i>{{ b }}</span>{% endfor %}<span><i class="hatch"></i>Pending</span></div>
+</div>
+
+<h2>By queue</h2>
+<div class="card scroll"><table>
+ <tr><th>Queue</th>{% for b in buckets %}<th class="n"><span class="dot" style="background:{{ pal.bcolor(b, buckets) }};margin-right:6px"></span>{{ b }}</th>{% endfor %}<th class="n">Pending</th><th class="n">Total</th></tr>
+ {% for g in by_queue %}<tr><td>{{ g.name }}</td>{% for b in buckets %}<td class="n {{ '' if g[b] else 'dim' }}">{{ g[b] }}</td>{% endfor %}
+ <td class="n {{ 'bad' if g.Pending else 'dim' }}">{{ g.Pending }}</td><td class="n"><b>{{ g.Total }}</b></td></tr>{% endfor %}
+</table></div>
+{% endblock %}

@@ -1,0 +1,113 @@
+Case Number,Case Owner,Customer,Country,Severity,Problem Summary,Product,Status,Age (Days),Created Date,Skill
+240120328,Dev Malhotra,Woodgrove Bank,Germany,1 - Critical,FlexProtect job running for days,F600,Open,83,2026-08-10,FS
+240191144,Arjun Mehta,Coho Vineyard,Germany,4 - Low,Node 9 panic and reboot overnight,H7000,Waiting on Customer,55,2026-09-07,
+240275362,Lukas Becker,Wide World Importers,Brazil,3 - Medium,Dedupe job reports no savings,H7000,Open,75,2026-08-18,
+240292445,Ananya Rao,Proseware Genomics,United Kingdom,2 - High,SMB share access denied after AD join,H7000,In Progress,52,2026-09-10,
+240309217,Emma Clarke,Coho Vineyard,Australia,1 - Critical,Robocopy to cluster share very slow,A300,Waiting on Customer,57,2026-09-05,Win
+240328825,Sofia Marques,Contoso Health,France,4 - Low,Product problem,F900,Waiting on Customer,55,2026-09-07,
+240329630,Lukas Becker,Northwind Media,UAE,3 - Medium,Kerberos failures for SMB3 clients,F600,In Progress,64,2026-08-29,
+240360927,Mira Holt,Tailspin Toys,United Kingdom,3 - Medium,CELOG alerts not sending email notification,A300,Waiting on Customer,44,2026-09-18,Admin
+240374760,Ananya Rao,Fabrikam Labs,Brazil,4 - Low,NDMP backup job failing with NetBackup,H7000,In Progress,71,2026-08-22,
+240381933,Emma Clarke,Coho Vineyard,United States,1 - Critical,showmount returns empty export list,F600,In Progress,86,2026-08-07,
+240386655,Fatima Zahra,Relecloud,Japan,4 - Low,Backend network fabric errors on leaf switch,H700,Open,50,2026-09-12,Net
+240400774,Kenji Watanabe,Contoso Health,Japan,3 - Medium,ACL inheritance broken on Windows share,H7000,In Progress,49,2026-09-13,Win
+240401885,Ananya Rao,Margie's Travel,Japan,3 - Medium,Veeam backup job stalls at 99%,F900,Open,65,2026-08-28,Bu
+240428474,Daniel Okafor,Alpine Ski House,UAE,3 - Medium,SmartPools file pool policy not tiering,H7000,In Progress,83,2026-08-10,
+240490395,Fatima Zahra,Blue Yonder Airlines,UAE,3 - Medium,"Intermittent issue, details to follow",F600,Open,41,2026-09-21,
+240491597,Dev Malhotra,Tailspin Toys,United States,3 - Medium,Robocopy to cluster share very slow,A300,In Progress,40,2026-09-22,Win
+240495788,Arjun Mehta,Margie's Travel,United States,3 - Medium,SmartQuota hard limit not enforced,H7000,Open,39,2026-09-23,FS
+240502260,Emma Clarke,Globex Logistics,Brazil,3 - Medium,OneFS upgrade health check failing,A300,Waiting on Customer,41,2026-09-21,Admin
+240503665,Ananya Rao,Initech Financial,Australia,2 - High,SMB share access denied after AD join,H7000,In Progress,40,2026-09-22,
+240537315,Dev Malhotra,Wide World Importers,United States,2 - High,DIMM correctable memory errors on node 8,F900,Open,38,2026-09-24,
+240549812,Daniel Okafor,Relecloud,Australia,3 - Medium,NFS mount hangs on ESXi datastore,A3000,In Progress,41,2026-09-21,Nix
+240551586,Tom Hughes,Contoso Health,Germany,3 - Medium,SMB share access denied after AD join,F900,Open,41,2026-09-21,Win
+240567173,Lukas Becker,Tailspin Toys,Japan,4 - Low,SmartPools file pool policy not tiering,H700,Open,41,2026-09-21,
+240567651,Fatima Zahra,Globex Logistics,Germany,4 - Low,Uplink flapping on core switch,H700,Open,35,2026-09-27,
+240570386,Neha Kapoor,Blue Yonder Airlines,Singapore,2 - High,DD Boost backup fail after network change,H7000,Waiting on Customer,39,2026-09-23,
+240574266,Tom Hughes,Trey Research,United States,3 - Medium,Failed drive in bay 7 not smartfailing,A300,In Progress,29,2026-10-03,Hw
+240580034,Dev Malhotra,Initech Financial,Japan,4 - Low,Root squash blocking writes on NFS export,F600,Open,28,2026-10-04,
+240596832,Emma Clarke,Datum Research,India,3 - Medium,Question about best practices,F900,Open,29,2026-10-03,
+240606972,Arjun Mehta,Humongous Insurance,United Kingdom,2 - High,InsightIQ not collecting cluster data,A300,In Progress,30,2026-10-02,
+240621805,Tom Hughes,Litware Analytics,Australia,3 - Medium,NDMP backup job failing with NetBackup,A3000,Open,30,2026-10-02,Bu
+240630446,Ananya Rao,Datum Research,Brazil,1 - Critical,CELOG alerts not sending email notification,H700,Waiting on Customer,33,2026-09-29,
+240643109,Mira Holt,Initech Financial,Australia,3 - Medium,"Node 8 unresponsive, needs power cycle",H7000,In Progress,28,2026-10-04,Hw
+240647140,Sofia Marques,Relecloud,United Kingdom,3 - Medium,Product problem,H7000,Open,34,2026-09-28,General
+240652123,Kenji Watanabe,Fabrikam Labs,Brazil,1 - Critical,NFS mount hangs on ESXi datastore,F900,Waiting on Customer,30,2026-10-02,
+240656243,Tom Hughes,Northwind Media,Singapore,3 - Medium,PSU power fault alert on node 4,A300,Open,30,2026-10-02,
+240656549,Neha Kapoor,Relecloud,Brazil,2 - High,Robocopy to cluster share very slow,F900,Open,28,2026-10-04,
+240663766,Ananya Rao,Contoso Health,Japan,3 - Medium,Log upload fails with isi_gather_info,A300,Open,32,2026-09-30,
+240665634,Mira Holt,Globex Logistics,Singapore,2 - High,showmount returns empty export list,H700,Waiting on Customer,31,2026-10-01,
+240668514,Daniel Okafor,Fabrikam Labs,Japan,3 - Medium,LDAP uid mapping wrong for Linux clients,F900,Open,30,2026-10-02,
+240696904,Tom Hughes,Proseware Genomics,Japan,3 - Medium,Oplock breaks causing app timeouts on share,F600,In Progress,22,2026-10-10,Win
+240702444,Fatima Zahra,Fabrikam Labs,Japan,3 - Medium,SupportAssist connectivity lost,A3000,Open,25,2026-10-07,Admin
+240704550,Sofia Marques,Northwind Media,United States,3 - Medium,Kerberos failures for SMB3 clients,A300,Open,25,2026-10-07,
+240707438,Ananya Rao,Tailspin Toys,Australia,3 - Medium,Frontend NIC port down on node 5,A3000,Open,21,2026-10-11,
+240710993,Dev Malhotra,Datum Research,United Kingdom,3 - Medium,DD Boost backup fail after network change,F600,In Progress,22,2026-10-10,
+240719602,Emma Clarke,Adventure Works,Brazil,3 - Medium,Failed drive in bay 14 not smartfailing,A300,In Progress,22,2026-10-10,
+240727033,Arjun Mehta,Woodgrove Bank,United States,3 - Medium,Veeam backup job stalls at 99%,H7000,In Progress,23,2026-10-09,
+240731247,Sofia Marques,Relecloud,UAE,1 - Critical,Log upload fails with isi_gather_info,H700,Open,26,2026-10-06,
+240734743,Lukas Becker,Relecloud,France,3 - Medium,Log upload fails with isi_gather_info,H700,In Progress,26,2026-10-06,
+240735751,Tom Hughes,Northwind Media,Brazil,3 - Medium,NDMP backup job failing with NetBackup,F600,Waiting on Customer,21,2026-10-11,Bu
+240739733,Fatima Zahra,Globex Logistics,Germany,3 - Medium,Customer needs assistance with cluster,H700,Open,22,2026-10-10,
+240744293,Mira Holt,Blue Yonder Airlines,United States,2 - High,InsightIQ not collecting cluster data,H700,Open,26,2026-10-06,Admin
+240751255,Sofia Marques,Alpine Ski House,France,3 - Medium,Failed drive in bay 5 not smartfailing,H700,Open,25,2026-10-07,
+240754782,Kenji Watanabe,Margie's Travel,United Kingdom,3 - Medium,License expired warning in WebUI,A300,Waiting on Customer,23,2026-10-09,Admin
+240765863,Emma Clarke,Lucerne Publishing,UAE,3 - Medium,Root squash blocking writes on NFS export,F600,Waiting on Customer,20,2026-10-12,
+240773570,Arjun Mehta,Blue Yonder Airlines,Singapore,2 - High,FlexProtect job running for days,F600,Waiting on Customer,18,2026-10-14,
+240781003,Ananya Rao,Humongous Insurance,United States,2 - High,SyncIQ policy failing on target cluster,A3000,Waiting on Customer,15,2026-10-17,FS
+240789912,Fatima Zahra,Initech Financial,Germany,1 - Critical,ACL inheritance broken on Windows share,F900,Open,17,2026-10-15,Win
+240802803,Mira Holt,Adventure Works,Japan,3 - Medium,NVRAM battery warning after maintenance,F600,Open,19,2026-10-13,
+240809336,Daniel Okafor,Woodgrove Bank,United Kingdom,3 - Medium,Machine account password expired,F600,Open,18,2026-10-14,Win
+240814020,Mira Holt,Trey Research,Singapore,3 - Medium,Avamar restore very slow,A3000,Open,16,2026-10-16,Bu
+240817982,Kenji Watanabe,Margie's Travel,France,3 - Medium,Product problem,F900,Open,20,2026-10-12,
+240823722,Dev Malhotra,Globex Logistics,Germany,3 - Medium,InsightIQ not collecting cluster data,H700,Open,20,2026-10-12,Admin
+240826711,Arjun Mehta,Woodgrove Bank,Germany,2 - High,"Node 3 unresponsive, needs power cycle",F900,In Progress,18,2026-10-14,Hw
+240836415,Neha Kapoor,Initech Financial,France,4 - Low,SSD journal errors reported on node 2,A3000,In Progress,16,2026-10-16,Hw
+240854058,Dev Malhotra,Lucerne Publishing,India,2 - High,Machine account password expired,H700,Pending Parts,16,2026-10-16,Win
+240855922,Emma Clarke,Woodgrove Bank,UAE,2 - High,Quota usage report wrong for directory,A3000,Waiting on Customer,15,2026-10-17,FS
+240858209,Emma Clarke,Alpine Ski House,Germany,2 - High,NFSv4 lockd errors after upgrade,A300,Waiting on Customer,18,2026-10-14,
+240867065,Fatima Zahra,Initech Financial,France,3 - Medium,SyncIQ policy failing on target cluster,F900,Open,7,2026-10-25,FS
+240869055,Dev Malhotra,Tailspin Toys,Japan,2 - High,Avamar restore very slow,A3000,Open,13,2026-10-19,
+240871672,Fatima Zahra,Proseware Genomics,Brazil,2 - High,Multiple drives failing in the same sled,H7000,Open,12,2026-10-20,
+240880040,Tom Hughes,Relecloud,United States,4 - Low,Static route missing after reboot of node 3,H7000,Waiting on Customer,7,2026-10-25,Net
+240888801,Kenji Watanabe,Proseware Genomics,UAE,2 - High,IP pool exhausted for SmartConnect,F900,Open,11,2026-10-21,
+240896157,Dev Malhotra,Blue Yonder Airlines,Singapore,4 - Low,Veeam backup job stalls at 99%,H7000,Waiting on Customer,7,2026-10-25,
+240907648,Dev Malhotra,Adventure Works,United States,2 - High,SSD journal errors reported on node 9,A3000,Waiting on Customer,11,2026-10-21,Hw
+240914583,Daniel Okafor,Lucerne Publishing,Germany,3 - Medium,"Node 8 unresponsive, needs power cycle",H700,Waiting on Customer,8,2026-10-24,
+240920523,Emma Clarke,Tailspin Toys,Japan,3 - Medium,"Domain controller unreachable, SMB logins slow",A300,In Progress,9,2026-10-23,Win
+240926355,Daniel Okafor,Relecloud,Singapore,3 - Medium,FlexProtect job running for days,F600,In Progress,12,2026-10-20,
+240927237,Kenji Watanabe,Globex Logistics,Australia,2 - High,Oplock breaks causing app timeouts on share,A3000,Open,12,2026-10-20,Win
+240933577,Neha Kapoor,Margie's Travel,United States,3 - Medium,FlexProtect job running for days,A3000,Open,13,2026-10-19,
+240936588,Daniel Okafor,Globex Logistics,Japan,2 - High,IP pool exhausted for SmartConnect,H7000,Open,13,2026-10-19,
+240940964,Daniel Okafor,Relecloud,India,1 - Critical,Remote session requested,A300,In Progress,7,2026-10-25,
+240942284,Daniel Okafor,Lucerne Publishing,Japan,3 - Medium,VMware datastore latency over NFS,H7000,Open,10,2026-10-22,
+240949582,Kenji Watanabe,Margie's Travel,Singapore,3 - Medium,NFS mount hangs on ESXi datastore,F600,In Progress,10,2026-10-22,Nix
+240952391,Ananya Rao,Blue Yonder Airlines,Japan,2 - High,Kerberos failures for SMB3 clients,H7000,Waiting on Customer,8,2026-10-24,
+240958427,Dev Malhotra,Proseware Genomics,United States,3 - Medium,DD Boost backup fail after network change,H700,Open,13,2026-10-19,Bu
+240958825,Dev Malhotra,Humongous Insurance,United States,3 - Medium,Backend network fabric errors on leaf switch,F600,Waiting on Customer,7,2026-10-25,
+240959524,Sofia Marques,Blue Yonder Airlines,UAE,3 - Medium,Backup admin user cannot log in to WebUI,F900,Open,6,2026-10-26,
+240960314,Kenji Watanabe,Contoso Health,United States,3 - Medium,IP pool exhausted for SmartConnect,H7000,Open,3,2026-10-29,
+240968834,Kenji Watanabe,Blue Yonder Airlines,France,4 - Low,Kerberos failures for SMB3 clients,H700,Waiting on Customer,4,2026-10-28,Win
+240971572,Neha Kapoor,Woodgrove Bank,Germany,3 - Medium,NVRAM battery warning after maintenance,A3000,Open,6,2026-10-26,
+240979956,Ananya Rao,Contoso Health,France,3 - Medium,Tape restore missing files,H7000,Open,6,2026-10-26,Bu
+240987746,Lukas Becker,Lucerne Publishing,France,2 - High,ACL inheritance broken on Windows share,A300,In Progress,2,2026-10-30,
+240992875,Fatima Zahra,Datum Research,Australia,1 - Critical,Robocopy to cluster share very slow,H700,Open,0,2026-11-01,
+240997804,Tom Hughes,Blue Yonder Airlines,Singapore,3 - Medium,NDMP backup job failing with NetBackup,A300,Open,1,2026-10-31,Bu
+241001492,Kenji Watanabe,Alpine Ski House,India,1 - Critical,"Intermittent issue, details to follow",F600,Waiting on Customer,0,2026-11-01,General
+241010256,Sofia Marques,Wide World Importers,Singapore,3 - Medium,PSU power fault alert on node 6,A300,Waiting on Customer,2,2026-10-30,
+241011164,Ananya Rao,Wide World Importers,United Kingdom,2 - High,Stale file handle on NFSv3 export,F600,Open,0,2026-11-01,
+241013818,Tom Hughes,Adventure Works,Singapore,3 - Medium,Dedupe job reports no savings,H700,Waiting on Customer,3,2026-10-29,
+241020634,Fatima Zahra,Globex Logistics,United Kingdom,2 - High,SSD journal errors reported on node 9,F900,In Progress,4,2026-10-28,
+241026408,Ananya Rao,Coho Vineyard,Germany,3 - Medium,Tape restore missing files,F600,Waiting on Customer,4,2026-10-28,
+241026966,Fatima Zahra,Humongous Insurance,UAE,3 - Medium,showmount returns empty export list,F900,In Progress,5,2026-10-27,
+241035356,Daniel Okafor,Humongous Insurance,UAE,4 - Low,Root squash blocking writes on NFS export,A300,Waiting on Customer,1,2026-10-31,
+241041392,Daniel Okafor,Tailspin Toys,Singapore,2 - High,Static route missing after reboot of node 7,F600,Waiting on Customer,2,2026-10-30,Net
+241044453,Neha Kapoor,Humongous Insurance,India,2 - High,Alerts flood after drive replacement,H700,Open,2,2026-10-30,
+241044869,Lukas Becker,Lucerne Publishing,India,4 - Low,Failed drive in bay 2 not smartfailing,H7000,Waiting on Customer,4,2026-10-28,Hw
+241049096,Lukas Becker,Wide World Importers,Germany,1 - Critical,Kerberos failures for SMB3 clients,H7000,Waiting on Customer,1,2026-10-31,
+241052323,Arjun Mehta,Globex Logistics,UAE,2 - High,Robocopy to cluster share very slow,F600,Waiting on Customer,4,2026-10-28,Win
+241057772,Sofia Marques,Proseware Genomics,India,1 - Critical,Fan failure on chassis 1,F900,Open,1,2026-10-31,
+241059954,Dev Malhotra,Northwind Media,Germany,2 - High,CELOG alerts not sending email notification,F900,Waiting on Customer,1,2026-10-31,
+241060452,Tom Hughes,Blue Yonder Airlines,France,2 - High,VLAN tagging lost after subnet change,F900,In Progress,2,2026-10-30,Net
+241067356,Daniel Okafor,Coho Vineyard,Brazil,4 - Low,SyncIQ failover test fails,F600,In Progress,5,2026-10-27,
+241067988,Mira Holt,Proseware Genomics,United Kingdom,4 - Low,Avamar restore very slow,H7000,Waiting on Customer,0,2026-11-01,

@@ -1,0 +1,5 @@
+{# One colour per bucket, by its position in settings.buckets. NAC stays first, so it is always the neutral grey. #}
+{% macro bcolor(b, buckets) -%}
+{%- set P = ['#8B93A1', '#FF6B5E', '#E8B04A', '#B18CFF', '#4CC3D9', '#6CCB8B', '#F08A4B', '#7AA2FF', '#E27BB1'] -%}
+{%- if b in buckets -%}{{ P[buckets.index(b) % (P|length)] }}{%- else -%}#5A616C{%- endif -%}
+{%- endmacro %}

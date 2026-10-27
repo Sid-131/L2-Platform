@@ -1,0 +1,64 @@
+{% extends "base.html" %}{% block body %}
+<h1>Triage</h1>
+<p class="sub">Cases the router could not place. Most have no usable text in the summary —
+"Product Problem", a pasted log — so nothing can match and a person has to read them.
+Pick a queue and the case goes to whoever currently carries the least in it.</p>
+
+<div class="card"><form class="filters" method="get">
+ <div><label>Week</label><select name="week_id" onchange="this.form.submit()">
+  {% for w in weeks %}<option value="{{w.id}}" {{'selected' if w.id==week_id}}>{{w.label}}</option>{% endfor %}
+ </select></div>
+ <div><label>Include</label><select name="score" onchange="this.form.submit()">
+  <option value="0" {{'selected' if not score}}>No match at all</option>
+  <option value="3" {{'selected' if score==3}}>Also weak matches (score 3 or less)</option>
+  <option value="6" {{'selected' if score==6}}>Also moderate matches (score 6 or less)</option>
+ </select></div>
+ <div style="align-self:center"><span class="big" id="left">{{items|length}}</span>
+  <span class="dim">to place</span></div>
+</form></div>
+
+{% if not items %}
+<div class="card"><b>Nothing to triage.</b>
+ <p class="dim" style="margin:8px 0 0">Every case this week landed in a queue.</p></div>
+{% endif %}
+
+{% for i in items %}
+<div class="card tri" data-cw="{{i.cw_id}}">
+ <div class="tri-meta">
+  <a href="/case/{{i.case_id}}">{{i.lightning}}</a>
+  {% if i.sf_url %}<a href="{{ i.sf_url }}" target="_blank" rel="noopener">Salesforce</a>{% endif %}
+  <span class="{{'warn' if i.severity in ['Critical','High']}}">{{i.severity}}</span>
+  <span class="dim">{{i.age}} days</span>
+  <span class="dim">{{i.status}}</span>
+  <span class="dim">{{i.tse}}</span>
+  {% if i.customer %}<span class="dim">{{i.customer[:40]}}</span>{% endif %}
+  {% if i.score %}<span class="pill car">score {{i.score}} — {{i.evidence}}</span>{% endif %}
+ </div>
+ <p class="tri-sum">{{i.summary or '(no summary in the export)'}}</p>
+ <div class="tri-acts">
+  {% for q in targets %}<button class="btn xs alt" data-q="{{q}}">{{q}}</button>{% endfor %}
+  <span class="tri-done dim"></span>
+ </div>
+</div>
+{% endfor %}
+
+<script>
+ const left = document.getElementById('left');
+ document.querySelectorAll('.tri').forEach(card => {
+  const cw = card.dataset.cw;
+  card.querySelectorAll('button[data-q]').forEach(b => b.onclick = () => {
+   card.querySelectorAll('button').forEach(x => x.disabled = true);
+   fetch('/api/bulk', {method:'POST', headers:{'Content-Type':'application/json'},
+     body: JSON.stringify({cw_ids:[cw], skill:b.dataset.q})})
+    .then(r => r.json()).then(r => {
+      if (!r.ok) { alert(r.error || 'not saved');
+        card.querySelectorAll('button').forEach(x => x.disabled = false); return; }
+      card.querySelector('.tri-done').textContent =
+        b.dataset.q + ' — ' + (r.owners[0] || 'unassigned');
+      card.classList.add('placed');
+      left.textContent = Math.max(0, parseInt(left.textContent, 10) - 1);
+    });
+  });
+ });
+</script>
+{% endblock %}

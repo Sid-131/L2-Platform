@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% import "_palette.html" as pal %}
+{% block title %}TSE report · L2 Review Platform{% endblock %}
+{% block body %}
+<form class="filters noprint" method="get" style="margin-bottom:24px">
+ <div style="min-width:320px"><label for="nm">Case owner</label>
+  <input id="nm" name="name" value="{{ name }}" list="tsel" placeholder="Start typing a name"></div>
+ <datalist id="tsel">{% for n in names %}<option value="{{ n }}">{% endfor %}</datalist>
+ <div><label for="pd">Period</label>
+  <select id="pd" name="period" onchange="if (this.form.elements['name'].value) this.form.submit()">
+  {% for k, v in periods.items() %}<option value="{{ k }}" {{ 'selected' if k == period }}>{{ v }}</option>{% endfor %}
+  </select></div>
+ <div><button class="btn">Show report</button></div>
+ {% if grid %}<div style="margin-left:auto"><button type="button" class="btn alt" onclick="window.print()">Print for the 1:1</button></div>{% endif %}
+</form>
+
+{% if not name %}
+<h1>TSE report</h1>
+<p class="sub">What the L2 reviews say about one case owner, week by week. Pick a name to build a printable sheet for a one-to-one.</p>
+{% elif not grid %}
+<div class="card">No cases for a case owner matching “{{ name }}”{% if period != 'all' %} in {{ period_label }}{% endif %}.</div>
+{% else %}
+{% set reviewed = totals.Total - totals.Pending %}
+<article class="report">
+ <div class="rhead">
+  <div><p>TSE review summary</p><h1>{{ name }}</h1>
+   <p style="margin-top:8px">{% if period != 'all' %}{{ period_label }} · {% endif %}{% if trend %}{{ trend[0].week }}{% if trend|length > 1 %} to {{ trend[-1].week }}{% endif %} · {% endif %}{{ reviewed }} of {{ totals.Total }} cases reviewed</p></div>
+ </div>
+
+ <h2>Verdicts across the period</h2>
+ {% if reviewed %}
+ <div class="split" role="img" aria-label="{% for b in buckets %}{{ totals[b] }} {{ b }}{{ ', ' if not loop.last }}{% endfor %}">
+  {% for b in buckets %}{% if totals[b] %}<i style="width:{{ 100 * totals[b] / reviewed }}%;background:{{ pal.bcolor(b, buckets) }}"></i>{% endif %}{% endfor %}
+ </div>
+ {% endif %}
+ <div class="legend">{% for b in buckets %}<span><i style="background:{{ pal.bcolor(b, buckets) }}"></i>{{ b }} <b>{{ totals[b] }}</b></span>{% endfor %}
+  {% if totals.Pending %}<span><i style="background:#D5D0C6"></i>Pending <b>{{ totals.Pending }}</b></span>{% endif %}</div>
+
+ <h2>Week by week</h2>
+ {% set runs = namespace(found=[]) %}
+ <div class="heat" style="grid-template-columns:170px repeat({{ trend|length }}, minmax(44px, 1fr))">
+  <span></span>{% for t in trend %}<span class="h">{{ t.week }}</span>{% endfor %}
+  {% for b in buckets %}
+   {# a run is 3+ consecutive weeks with this bucket: count forwards and backwards from each week #}
+   {% set ns = namespace(f=[], g=[], s=0) %}
+   {% for t in trend %}{% set ns.s = ns.s + 1 if t[b] else 0 %}{% set ns.f = ns.f + [ns.s] %}{% endfor %}
+   {% set ns.s = 0 %}
+   {% for t in trend|reverse %}{% set ns.s = ns.s + 1 if t[b] else 0 %}{% set ns.g = [ns.s] + ns.g %}{% endfor %}
+   {% set color = pal.bcolor(b, buckets) %}
+   <span class="rl"><span class="dot" style="background:{{ color }}"></span>{{ b }}</span>
+   {% for t in trend %}
+    {% set run = b != buckets[0] and ns.f[loop.index0] + ns.g[loop.index0] - 1 >= 3 %}
+    {% if run and b not in runs.found %}{% set runs.found = runs.found + [b] %}{% endif %}
+    {% if t[b] %}<span class="cell{{ ' run' if run }}" style="background:color-mix(in srgb, {{ color }} {{ [30 + 14 * t[b], 100]|min }}%, #F6F4EF)">{{ t[b] }}</span>
+    {% else %}<span class="cell z">0</span>{% endif %}
+   {% endfor %}
+  {% endfor %}
+ </div>
+ {% if runs.found %}
+ <div class="callout">
+  <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><circle cx="10" cy="10" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 5.5v5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="14" r="1.1" fill="currentColor"/></svg>
+  <div><b>{{ runs.found|join(', ') }}: three or more weeks running</b>, outlined above. One week never shows a pattern. Three in a row is worth a conversation.</div>
+ </div>
+ {% endif %}
+
+ <h2>What the reviewers wrote ({{ comments|length }})</h2>
+ <ul class="quotes">
+  {% for c in comments %}
+  <li><div class="qmeta"><b>{{ c.lightning }}</b><br>{{ c.week }} · {{ c.skill }}<br>
+    <span class="chip"><span class="dot" style="background:{{ pal.bcolor(c.bucket, buckets) }}"></span>{{ c.bucket }}</span></div>
+   <div>{% if c.comment %}<q>{{ c.comment }}</q>{% else %}<span class="qmeta">No comment</span>{% endif %}
+    <div class="qmeta" style="margin-top:6px">{{ c.summary[:140] }}</div></div>
+   <div class="qmeta" style="text-align:right">{{ c.author }}{% if c.call %}<br>call made: {{ c.call }}{% endif %}</div></li>
+  {% else %}<li><span class="qmeta">No verdicts with a bucket yet.</span></li>{% endfor %}
+ </ul>
+ <div class="rfoot"><span>Internal. Contains assessments of a named engineer. Do not forward.</span></div>
+</article>
+
+{% if grid|length > 1 %}
+<div class="noprint">
+<h2>Every case owner matching “{{ name }}”</h2>
+<div class="card scroll"><table>
+ <tr><th>Case owner</th>{% for b in buckets %}<th class="n">{{ b }}</th>{% endfor %}<th class="n">Pending</th><th class="n">Total</th></tr>
+ {% for g in grid %}<tr><td><a href="?name={{ g.name|urlencode }}&period={{ period }}">{{ g.name }}</a></td>{% for b in buckets %}<td class="n {{ '' if g[b] else 'dim' }}">{{ g[b] }}</td>{% endfor %}
+ <td class="n dim">{{ g.Pending }}</td><td class="n"><b>{{ g.Total }}</b></td></tr>{% endfor %}
+</table></div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}
